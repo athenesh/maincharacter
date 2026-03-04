@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useParams } from 'next/navigation';
 import LifeCurve from '@/components/LifeCurve';
 import { Story, StoryChapter, LifeEvent, Photo } from '@/types';
 
-export default function StoryPage() {
+function StoryContent() {
   const params = useParams();
   const storyId = params.id as string;
 
@@ -179,5 +179,20 @@ export default function StoryPage() {
         <p>Created with MainCharacter · Preserving life stories with AI</p>
       </footer>
     </div>
+  );
+}
+
+export default function StoryPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading story...</p>
+        </div>
+      </div>
+    }>
+      <StoryContent />
+    </Suspense>
   );
 }
