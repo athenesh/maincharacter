@@ -1,12 +1,16 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
-// Use Flash for interviews and drafts (cheaper)
-export const flashModel = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+// Use Gemini 2.5 Flash for quick interview questions
+export const flashModel = genAI.getGenerativeModel({ 
+  model: 'gemini-2.5-flash'
+});
 
-// Use Pro for final story generation (better quality)
-export const proModel = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+// Use Gemini 2.5 Pro for final story generation (better quality)
+export const proModel = genAI.getGenerativeModel({ 
+  model: 'gemini-2.5-pro'
+});
 
 // Optimized prompt templates to save tokens
 

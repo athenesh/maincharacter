@@ -26,13 +26,19 @@ function InterviewContent() {
   const [questionsInPeriod, setQuestionsInPeriod] = useState(0);
   
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
     if (!storyId) {
       router.push('/');
       return;
     }
-    loadStoryAndStart();
+    
+    // Prevent double initialization in React Strict Mode
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      loadStoryAndStart();
+    }
   }, [storyId]);
 
   useEffect(() => {
@@ -43,16 +49,17 @@ function InterviewContent() {
     try {
       const response = await fetch(`/api/story?id=${storyId}`);
       const { story } = await response.json();
-      setCharacterName(story.main_character_name);
+      const name = story.main_character_name;
+      setCharacterName(name);
       
-      // Generate first question
-      await generateNextQuestion();
+      // Generate first question with the loaded name
+      await generateNextQuestion(name);
     } catch (error) {
       console.error('Failed to load story:', error);
     }
   };
 
-  const generateNextQuestion = async () => {
+  const generateNextQuestion = async (nameOverride?: string) => {
     setIsLoading(true);
     try {
       const response = await fetch('/api/gemini/interview', {
@@ -62,22 +69,35 @@ function InterviewContent() {
           storyId,
           action: 'generate_question',
           data: {
-            characterName: characterName || 'the person',
+            characterName: nameOverride || characterName || 'the person',
             currentPeriod: LIFE_PERIODS[currentPeriodIndex].key,
             questionNumber
           }
         })
       });
 
-      const { question } = await response.json();
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('API Error:', errorData);
+        throw new Error(`API returned ${response.status}: ${errorData.error || 'Unknown error'}`);
+      }
+
+      const data = await response.json();
+      console.log('Question generated:', data);
+      
+      if (!data.question) {
+        throw new Error('No question returned from API');
+      }
       
       setMessages(prev => [...prev, { 
         type: 'question', 
-        text: question,
+        text: data.question,
         questionNumber 
       }]);
     } catch (error) {
       console.error('Failed to generate question:', error);
+      // Show error to user
+      alert(`Failed to generate question: ${error instanceof Error ? error.message : 'Unknown error'}. Please refresh the page and try again.`);
     } finally {
       setIsLoading(false);
     }

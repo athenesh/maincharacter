@@ -3,6 +3,8 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useParams } from 'next/navigation';
 import LifeCurve from '@/components/LifeCurve';
+import PhotoUpload from '@/components/PhotoUpload';
+import PhotoGallery from '@/components/PhotoGallery';
 import { Story, StoryChapter, LifeEvent, Photo } from '@/types';
 
 function StoryContent() {
@@ -14,6 +16,7 @@ function StoryContent() {
   const [events, setEvents] = useState<LifeEvent[]>([]);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showPhotoUpload, setShowPhotoUpload] = useState(false);
 
   useEffect(() => {
     loadStory();
@@ -39,6 +42,15 @@ function StoryContent() {
     const url = window.location.href;
     navigator.clipboard.writeText(url);
     alert('Story link copied to clipboard!');
+  };
+
+  const handlePhotoUploadComplete = (photo: Photo) => {
+    setPhotos(prev => [...prev, photo]);
+    setShowPhotoUpload(false);
+  };
+
+  const handlePhotoDelete = (photoId: string) => {
+    setPhotos(prev => prev.filter(p => p.id !== photoId));
   };
 
   if (isLoading) {
@@ -79,16 +91,47 @@ function StoryContent() {
               {approximateAge && ` · ${approximateAge} years old`}
             </p>
           </div>
-          <button
-            onClick={handleShare}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-          >
-            Share Story
-          </button>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => setShowPhotoUpload(!showPhotoUpload)}
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-colors"
+            >
+              {showPhotoUpload ? 'Hide Upload' : '+ Add Photos'}
+            </button>
+            <button
+              onClick={handleShare}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+            >
+              Share Story
+            </button>
+          </div>
         </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-12">
+        {/* Photo Upload Form */}
+        {showPhotoUpload && (
+          <section className="mb-12">
+            <PhotoUpload 
+              storyId={storyId}
+              characterName={story.main_character_name}
+              onUploadComplete={handlePhotoUploadComplete}
+            />
+          </section>
+        )}
+
+        {/* Photo Gallery */}
+        {photos.length > 0 && (
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Photo Gallery</h2>
+            <PhotoGallery 
+              photos={photos} 
+              onDelete={handlePhotoDelete}
+              editable={true}
+            />
+          </section>
+        )}
+
         {/* Life Curve */}
         {events.length > 0 && (
           <section className="bg-white rounded-2xl shadow-lg p-8 mb-12">

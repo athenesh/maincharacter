@@ -161,13 +161,69 @@ Edit `/lib/gemini.ts`:
 - Adjust life periods (currently 4)
 - Modify AI prompts for different tone
 
+## 📸 Photo Upload Setup (NEW!)
+
+### IMPORTANT: Set Up Supabase Storage First
+
+Before photos will work, run this SQL in Supabase:
+
+1. Go to https://supabase.com/dashboard
+2. Open your project (khlsggafheknjcnvompo)
+3. Click **SQL Editor** (left sidebar)
+4. Click **New Query**
+5. Copy and paste this SQL:
+
+```sql
+-- Create the storage bucket
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('story-photos', 'story-photos', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Allow public uploads (temporary until you add authentication)
+CREATE POLICY "Public upload" ON storage.objects
+  FOR INSERT TO public
+  WITH CHECK (bucket_id = 'story-photos');
+
+-- Allow public reads (so photos can be viewed)
+CREATE POLICY "Public read" ON storage.objects
+  FOR SELECT TO public
+  USING (bucket_id = 'story-photos');
+
+-- Allow public deletes (temporary until you add authentication)
+CREATE POLICY "Public delete" ON storage.objects
+  FOR DELETE TO public
+  USING (bucket_id = 'story-photos');
+```
+
+6. Click **Run** (or press Cmd+Enter)
+7. You should see "Success. No rows returned"
+
+### How to Use Photo Upload:
+
+1. **Open any completed story**
+2. **Click "+ Add Photos"** in the header
+3. **Select a photo** (max 5MB)
+4. **Add metadata** (optional):
+   - Mark if it's the main character
+   - Add approximate age in photo
+5. **Click "Upload Photo"**
+6. Photo appears in gallery!
+
+**View Photos**:
+- Click any photo for full-screen view
+- Hover to see metadata
+- Click delete to remove
+
 ## 🚀 Next Steps After Testing
 
-1. ✅ Test with your own info first
-2. ✅ Create your grandma's story
-3. ✅ Share with family to review
-4. ✅ Deploy to Vercel for others
-5. ✅ Send link to your 20 users
+1. ✅ Upgrade Node.js to v20+
+2. ✅ Set up Supabase storage bucket (see above)
+3. ✅ Test with your own info first
+4. ✅ Upload some test photos
+5. ✅ Create your grandma's story
+6. ✅ Share with family to review
+7. ✅ Deploy to Vercel for others
+8. ✅ Send link to your 20 users
 
 ## 📞 Need Help?
 

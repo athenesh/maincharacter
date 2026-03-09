@@ -124,9 +124,10 @@ maincharacter/
 - ✅ Story generation
 - ✅ Shareable web pages
 
-### Phase 2 (Next)
+### Phase 2 (In Progress)
 - 🔲 Clerk authentication
-- 🔲 Photo upload & AI cartoon generation
+- ✅ Photo upload
+- 🔲 AI cartoon generation (Korean webtoon style)
 - 🔲 PDF export
 - 🔲 Edit/refine stories
 
